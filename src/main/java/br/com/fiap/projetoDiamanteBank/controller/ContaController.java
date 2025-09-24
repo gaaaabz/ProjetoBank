@@ -21,6 +21,7 @@ import br.com.fiap.projetoDiamanteBank.Service.ContaService;
 import br.com.fiap.projetoDiamanteBank.model.Conta;
 import br.com.fiap.projetoDiamanteBank.repository.ContaRepository;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -60,6 +61,40 @@ public class ContaController {
         conta.setAtivo(false);
         return contaRepository.save(conta);
     }
+
+     @PutMapping("/depositar/{id}")
+    public Conta depositar(@PathVariable Long id, @RequestParam @Positive(message = "O valor do depósito deve ser maior que zero" )BigDecimal valor) {
+        Conta conta = buscarPorId(id);
+        
+        conta.setSaldo(conta.getSaldo().add(valor));
+        return contaRepository.save(conta);
+    }
     
+
+    @PutMapping("/sacar/{id}")
+    public Conta sacar(@PathVariable Long id, @RequestParam @Positive(message = "O valor do saque deve ser maior que zero") BigDecimal valor) {
+        Conta conta = buscarPorId(id);
+
+          if (valor.compareTo(conta.getSaldo()) > 0) {
+        throw new IllegalArgumentException("Saldo insuficiente para realizar o saque.");
+    }
+
+        conta.setSaldo(conta.getSaldo().subtract(valor));
+        return contaRepository.save(conta);
+    }
+
+    @PutMapping("/pix/{id}")
+    public Conta realizarPix(@RequestParam @Positive(message = "O valor deve ser maior que zero") BigDecimal valor, @RequestParam Long idRemetente, @RequestParam Long idRecebedor) {
+
+    Conta remetente = buscarPorId(idRemetente);
+    Conta recebedor = buscarPorId(idRecebedor);
+    if (valor.compareTo(remetente.getSaldo()) > 0) {
+        throw new IllegalArgumentException("Saldo insuficiente para realizar o pix.");
+    }
+    remetente.setSaldo(remetente.getSaldo().subtract(valor));
+    recebedor.setSaldo(recebedor.getSaldo().add(valor));
+    contaRepository.save(remetente);
+    return contaRepository.save(recebedor);
+}
 }
 
