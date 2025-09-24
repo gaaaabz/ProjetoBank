@@ -53,7 +53,13 @@ public class ContaController {
     public Conta buscarPorId(@PathVariable Long id) {
         return contaRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conta não encontrada"));
     }
-
+    
+    @PutMapping("/encerrar/{id}")
+    public Conta encerrar(@PathVariable Long id) {
+        Conta conta = buscarPorId(id);
+        conta.setAtivo(false);
+        return contaRepository.save(conta);
+    }
     
 }
 
