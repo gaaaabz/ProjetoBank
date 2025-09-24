@@ -84,7 +84,7 @@ public class ContaController {
     }
 
     @PutMapping("/pix/{id}")
-    public Conta realizarPix(@RequestParam @Positive(message = "O valor deve ser maior que zero") BigDecimal valor, @RequestParam Long idRemetente, @RequestParam Long idRecebedor) {
+    public Conta pix(@RequestParam @Positive(message = "O valor deve ser maior que zero") BigDecimal valor, @RequestParam Long idRemetente, @RequestParam Long idRecebedor) {
 
     Conta remetente = buscarPorId(idRemetente);
     Conta recebedor = buscarPorId(idRecebedor);
