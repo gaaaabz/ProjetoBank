@@ -2,8 +2,9 @@ package br.com.fiap.projetoDiamanteBank.controller;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Locale.Category;
 
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,11 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
-
-import com.br.fiap.ProjetoBank.model.Conta;
-import com.br.fiap.ProjetoBank.service.ContaService;
-
+import br.com.fiap.projetoDiamanteBank.Service.ContaService;
+import br.com.fiap.projetoDiamanteBank.model.Conta;
+import br.com.fiap.projetoDiamanteBank.repository.ContaRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,7 +28,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ContaController {
  
-    private final ContaService contaService;
+    @Autowired
+    private ContaRepository contaRepository;
+
+    @Autowired
+    private ContaService contaService;
 
     public ContaController(ContaService contaService) {
         this.contaService = contaService;
@@ -40,33 +45,15 @@ public class ContaController {
     }
 
     @GetMapping
-    public List<Conta> listar() {
-        return contaService.listarContas();
+    public List<Conta> index() {
+        return contaRepository.findAll();
     }
 
     @GetMapping("/{id}")
     public Conta buscarPorId(@PathVariable Long id) {
-        return contaService.buscarContaPorId(id);
+        return contaRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conta não encontrada"));
     }
 
-    @PutMapping("/{id}/encerrar")
-    public Conta encerrar(@PathVariable Long id) {
-        return contaService.encerrarConta(id);
-    }
-
-    @PutMapping("/{id}/deposito")
-    public Conta depositar(@PathVariable Long id, @RequestParam BigDecimal valor) {
-        return contaService.depositar(id, valor);
-    }
-
-    @PutMapping("/{id}/saque")
-    public Conta sacar(@PathVariable Long id, @RequestParam BigDecimal valor) {
-        return contaService.sacar(id, valor);
-    }
-
-    @PutMapping("/pix")
-    public Conta pix(@RequestParam Long idOrigem, @RequestParam Long idDestino, @RequestParam BigDecimal valor) {
-        return contaService.transferir(idOrigem, idDestino, valor);
-    }
+    
 }
 
